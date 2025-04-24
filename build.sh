@@ -32,17 +32,8 @@ if [ -d "poky-source" ]; then
     echo ""
     echo "To run in QEMU (after building), run:"
     echo "  runqemu defender-automotive"
-
-    cat conf/bblayers.conf | grep meta-defender
 else
     echo "ERROR: poky-source directory not found!"
     echo "Please run the initial setup script first."
     exit 1
 fi
-
-find meta-defender -type d | sort
-
-mkdir -p meta-defender/recipes-core/images/
-# Copy your defender-automotive-image.bb here
-
-bitbake-layers show-recipes "*-image-*"
