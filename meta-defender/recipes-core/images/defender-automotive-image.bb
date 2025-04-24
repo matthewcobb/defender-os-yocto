@@ -65,6 +65,7 @@ IMAGE_INSTALL += " \
     defender-carplay \
     defender-launcher \
     defender-settings \
+    packagegroup-defender-automotive \
 "
 
 # For debugging and development
