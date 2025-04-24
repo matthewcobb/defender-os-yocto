@@ -14,7 +14,7 @@ S = "${WORKDIR}"
 
 inherit qt6-cmake pkgconfig
 
-do_install_append() {
+do_install:append() {
     install -d ${D}${datadir}/applications
     install -m 0644 ${WORKDIR}/defender-settings.desktop ${D}${datadir}/applications/
 

@@ -17,7 +17,7 @@ inherit qt6-cmake pkgconfig systemd
 
 SYSTEMD_SERVICE:${PN} = "defender-launcher.service"
 
-do_install_append() {
+do_install:append() {
     install -d ${D}${datadir}/applications
     install -m 0644 ${WORKDIR}/defender-launcher.desktop ${D}${datadir}/applications/
 

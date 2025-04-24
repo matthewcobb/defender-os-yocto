@@ -16,7 +16,7 @@ inherit qt6-cmake pkgconfig systemd
 
 SYSTEMD_SERVICE:${PN} = "defender-carplay.service"
 
-do_install_append() {
+do_install:append() {
     install -d ${D}${datadir}/applications
     install -m 0644 ${WORKDIR}/defender-carplay.desktop ${D}${datadir}/applications/
 
