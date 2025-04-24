@@ -53,15 +53,11 @@ BBLAYERS ?= " \\
   ${SCRIPT_DIR}/meta-openembedded/meta-python \\
   ${SCRIPT_DIR}/meta-openembedded/meta-filesystems \\
   ${SCRIPT_DIR}/meta-qt6 \\
-  ${SCRIPT_DIR}/meta-clang \\
-  ${SCRIPT_DIR}/meta-rust \\
-  ${SCRIPT_DIR}/meta-browser/meta-chromium \\
-  ${SCRIPT_DIR}/meta-virtualization \\
   ${SCRIPT_DIR}/meta-raspberrypi \\
   ${SCRIPT_DIR}/meta-defender \\
   "
 EOF
-    echo "Created conf/bblayers.conf with all required layers (using absolute paths)"
+    echo "Created simplified conf/bblayers.conf with essential layers only"
 }
 
 # Create or update meta-defender layer if it doesn't exist
@@ -129,6 +125,15 @@ IMAGE_INSTALL += " \\
     weston-init \\
 "
 
+# Qt packages
+IMAGE_INSTALL += " \\
+    qtbase \\
+    qtdeclarative \\
+    qtquickcontrols2 \\
+    qtsvg \\
+    qtwayland \\
+"
+
 # Set the root password to 'defender'
 inherit extrausers
 EXTRA_USERS_PARAMS = "usermod -P defender root;"
@@ -152,18 +157,6 @@ clone_or_update "https://code.qt.io/yocto/meta-qt6.git" "" "meta-qt6"
 
 # OpenEmbedded
 clone_or_update "git://git.openembedded.org/meta-openembedded" "kirkstone" "meta-openembedded"
-
-# Clang (required by Chromium)
-clone_or_update "https://github.com/kraj/meta-clang.git" "kirkstone" "meta-clang"
-
-# Rust (required by some dependencies) - use main branch as kirkstone doesn't exist
-clone_or_update "https://github.com/meta-rust/meta-rust.git" "none" "meta-rust"
-
-# Virtualization
-clone_or_update "git://git.yoctoproject.org/meta-virtualization" "kirkstone" "meta-virtualization"
-
-# Browser
-clone_or_update "https://github.com/OSSystems/meta-browser.git" "kirkstone" "meta-browser"
 
 # Raspberry Pi
 clone_or_update "https://git.yoctoproject.org/meta-raspberrypi" "kirkstone" "meta-raspberrypi"

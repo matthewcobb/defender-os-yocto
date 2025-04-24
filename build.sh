@@ -1,181 +1,123 @@
 #!/bin/bash
 
-set -e
-
-echo "Setting up Defender Automotive OS build environment..."
-
 # Get the absolute path of the current directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Function to check for required layers
+check_layers() {
+    local missing_layers=""
+
+    # Check for essential layers
+    if [ ! -d "${SCRIPT_DIR}/poky-source/meta" ]; then
+        missing_layers="${missing_layers}\n - poky-source/meta (Yocto base)"
+    fi
+
+    if [ ! -d "${SCRIPT_DIR}/meta-openembedded/meta-oe" ]; then
+        missing_layers="${missing_layers}\n - meta-openembedded/meta-oe (Core OpenEmbedded layer)"
+    fi
+
+    if [ ! -d "${SCRIPT_DIR}/meta-openembedded/meta-multimedia" ]; then
+        missing_layers="${missing_layers}\n - meta-openembedded/meta-multimedia (Multimedia support)"
+    fi
+
+    if [ ! -d "${SCRIPT_DIR}/meta-openembedded/meta-networking" ]; then
+        missing_layers="${missing_layers}\n - meta-openembedded/meta-networking (Networking support)"
+    fi
+
+    if [ ! -d "${SCRIPT_DIR}/meta-openembedded/meta-python" ]; then
+        missing_layers="${missing_layers}\n - meta-openembedded/meta-python (Python support)"
+    fi
+
+    if [ ! -d "${SCRIPT_DIR}/meta-openembedded/meta-filesystems" ]; then
+        missing_layers="${missing_layers}\n - meta-openembedded/meta-filesystems (Additional filesystems)"
+    fi
+
+    if [ ! -d "${SCRIPT_DIR}/meta-qt6" ]; then
+        missing_layers="${missing_layers}\n - meta-qt6 (Qt 6 support)"
+    fi
+
+    if [ ! -d "${SCRIPT_DIR}/meta-raspberrypi" ]; then
+        missing_layers="${missing_layers}\n - meta-raspberrypi (Raspberry Pi support)"
+    fi
+
+    if [ ! -d "${SCRIPT_DIR}/meta-defender" ]; then
+        missing_layers="${missing_layers}\n - meta-defender (Defender Automotive OS layer)"
+    fi
+
+    if [ -n "$missing_layers" ]; then
+        echo -e "ERROR: The following layers are missing:${missing_layers}"
+        echo ""
+        echo "Please run ./setup.sh to create or update the required repositories."
+        return 1
+    fi
+
+    return 0
+}
 
 # Create build directory if it doesn't exist
 if [ ! -d "${SCRIPT_DIR}/build" ]; then
     mkdir -p "${SCRIPT_DIR}/build"
+    echo "Created build directory."
 fi
 
-# Function to check if all required layers are available
-check_layers() {
-    echo "Checking for required layers..."
+# Check if all required layers are present
+if ! check_layers; then
+    echo "Build environment setup failed due to missing layers."
+    return 1
+fi
 
-    declare -a REQUIRED_LAYERS=(
-        "poky-source/meta"
-        "poky-source/meta-poky"
-        "poky-source/meta-yocto-bsp"
-        "meta-openembedded/meta-oe"
-        "meta-openembedded/meta-multimedia"
-        "meta-openembedded/meta-networking"
-        "meta-openembedded/meta-python"
-        "meta-openembedded/meta-filesystems"
-        "meta-qt6"
-        "meta-clang"
-        "meta-rust"
-        "meta-browser"
-        "meta-virtualization"
-        "meta-raspberrypi"
-        "meta-defender"
-    )
+# Back up conf files if they exist
+if [ -f "${SCRIPT_DIR}/build/conf/bblayers.conf" ]; then
+    cp "${SCRIPT_DIR}/build/conf/bblayers.conf" "${SCRIPT_DIR}/build/conf/bblayers.conf.bak"
+    echo "Backed up existing bblayers.conf"
+fi
 
-    local missing=0
-    for layer in "${REQUIRED_LAYERS[@]}"; do
-        if [ ! -d "${SCRIPT_DIR}/${layer}" ]; then
-            echo "ERROR: Missing layer: ${layer}"
-            echo "Expected path: ${SCRIPT_DIR}/${layer}"
-            missing=1
-        fi
-    done
+if [ -f "${SCRIPT_DIR}/build/conf/local.conf" ]; then
+    cp "${SCRIPT_DIR}/build/conf/local.conf" "${SCRIPT_DIR}/build/conf/local.conf.bak"
+    echo "Backed up existing local.conf"
+fi
 
-    if [ $missing -eq 1 ]; then
-        echo "Some required layers are missing. Please run ./setup.sh first."
-        return 1
-    fi
+# Source the Yocto environment
+cd "${SCRIPT_DIR}"
+source poky-source/oe-init-build-env build
 
-    echo "All required layers found."
-    return 0
-}
-
-# Fix for meta-rust compatibility
-update_rust_compatibility() {
-    if [ -f "conf/bblayers.conf" ]; then
-        # Check if meta-rust is compatible with the current version
-        if grep -q "meta-rust" conf/bblayers.conf; then
-            if [ -f "${SCRIPT_DIR}/meta-rust/conf/layer.conf" ]; then
-                # Check if LAYERSERIES_COMPAT_rust-layer includes kirkstone
-                if ! grep -q "LAYERSERIES_COMPAT_rust-layer.*kirkstone" "${SCRIPT_DIR}/meta-rust/conf/layer.conf"; then
-                    echo "Updating meta-rust compatibility with kirkstone..."
-                    if grep -q "LAYERSERIES_COMPAT_rust-layer" "${SCRIPT_DIR}/meta-rust/conf/layer.conf"; then
-                        # Add kirkstone to compatible layers
-                        sed -i 's/LAYERSERIES_COMPAT_rust-layer = "/LAYERSERIES_COMPAT_rust-layer = "kirkstone /g' "${SCRIPT_DIR}/meta-rust/conf/layer.conf"
-                    fi
-                fi
-            fi
-        fi
-    fi
-}
-
-# Source the Yocto environment if poky-source exists
-if [ -d "${SCRIPT_DIR}/poky-source" ]; then
-    # First check if all required layers are available
-    check_layers || exit 1
-
-    # Backup existing config files if they exist
-    if [ -f "${SCRIPT_DIR}/build/conf/bblayers.conf" ]; then
-        cp "${SCRIPT_DIR}/build/conf/bblayers.conf" /tmp/bblayers.conf.save
-    fi
-    if [ -f "${SCRIPT_DIR}/build/conf/local.conf" ]; then
-        cp "${SCRIPT_DIR}/build/conf/local.conf" /tmp/local.conf.save
-    fi
-
-    # Source Poky environment
-    source "${SCRIPT_DIR}/poky-source/oe-init-build-env" "${SCRIPT_DIR}/build"
-
-    # Restore configs if backups exist
-    if [ -f "/tmp/bblayers.conf.save" ]; then
-        cp /tmp/bblayers.conf.save conf/bblayers.conf
-        echo "Restored custom bblayers.conf"
-    elif [ -f "${SCRIPT_DIR}/conf/bblayers.conf" ]; then
-        # Use the one generated by setup.sh if available
-        cp "${SCRIPT_DIR}/conf/bblayers.conf" conf/
-        echo "Copied bblayers.conf from setup.sh"
-    fi
-
-    if [ -f "/tmp/local.conf.save" ]; then
-        cp /tmp/local.conf.save conf/local.conf
-        echo "Restored custom local.conf"
-    elif [ ! -f "conf/local.conf" ]; then
-        # Create a default local.conf for Raspberry Pi
-        cat > conf/local.conf << EOF
-# Local configuration for Defender Automotive builds
-
-MACHINE ?= "raspberrypi4"
-DISTRO ?= "poky"
-PACKAGE_CLASSES ?= "package_rpm"
-EXTRA_IMAGE_FEATURES ?= "debug-tweaks"
-USER_CLASSES ?= "buildstats"
-PATCHRESOLVE = "noop"
-
-# Use systemd as init system
-DISTRO_FEATURES:append = " systemd wayland pam"
-DISTRO_FEATURES:remove = "x11 sysvinit"
-VIRTUAL-RUNTIME_init_manager = "systemd"
-VIRTUAL-RUNTIME_initscripts = ""
-
-# Use Qt6 for UI
-PREFERRED_PROVIDER_virtual/libgl = "mesa"
-PREFERRED_PROVIDER_virtual/egl = "mesa"
-
-# Add Qt6 settings
-PACKAGECONFIG:append:pn-qtbase = " gles2 eglfs fontconfig"
-
-# Optimize build for Raspberry Pi
-BB_NUMBER_THREADS ?= "4"
-PARALLEL_MAKE ?= "-j 4"
-
-# Download and cache locations
-DL_DIR ?= "\${TOPDIR}/downloads"
-SSTATE_DIR ?= "\${TOPDIR}/sstate-cache"
-
-# Add automotive-specific packages
-CORE_IMAGE_EXTRA_INSTALL += "defender-dashboard defender-carplay defender-launcher defender-settings"
-
-# Enable debug features during development
-EXTRA_IMAGE_FEATURES += "debug-tweaks ssh-server-openssh tools-debug tools-sdk"
-
-# Enable network configuration
-INHERIT += "extrausers"
-EXTRA_USERS_PARAMS = "usermod -P defender root;"
-
-# Reduce build tasks and disk usage
-INHERIT += "rm_work"
-BB_DISKMON_DIRS = ""
-
-# Disable inotify for macOS builds
-BB_INOTIFY_ENABLED = "0"
-EOF
-        echo "Created default local.conf for Raspberry Pi"
-    fi
-
-    # Update meta-rust for compatibility
-    update_rust_compatibility
-
-    # Verify the environment
-    echo "Verifying build environment..."
-    bitbake-layers show-layers || {
-        echo "WARNING: There was an issue with the layers configuration."
-        echo "Please check your bblayers.conf manually."
-    }
-
-    echo ""
-    echo "Build environment configured."
-    echo ""
-    echo "To build the full image, run:"
-    echo "  bitbake defender-automotive-image"
-    echo ""
-    echo "To build just the dashboard app, run:"
-    echo "  bitbake defender-dashboard"
-    echo ""
-    echo "To run in QEMU (after building), run:"
-    echo "  runqemu defender-automotive"
+# Restore configurations if backups exist, otherwise create them
+if [ -f "${SCRIPT_DIR}/build/conf/bblayers.conf.bak" ]; then
+    cp "${SCRIPT_DIR}/build/conf/bblayers.conf.bak" "${SCRIPT_DIR}/build/conf/bblayers.conf"
+    echo "Restored custom bblayers.conf"
 else
-    echo "ERROR: poky-source directory not found at ${SCRIPT_DIR}/poky-source!"
-    echo "Please run ./setup.sh first."
-    exit 1
+    cat "${SCRIPT_DIR}/conf/bblayers.conf" > "${SCRIPT_DIR}/build/conf/bblayers.conf"
+    echo "Created bblayers.conf from template"
 fi
+
+if [ -f "${SCRIPT_DIR}/build/conf/local.conf.bak" ]; then
+    cp "${SCRIPT_DIR}/build/conf/local.conf.bak" "${SCRIPT_DIR}/build/conf/local.conf"
+    echo "Restored custom local.conf"
+else
+    # Add specific configurations for Raspberry Pi
+    sed -i "s/^MACHINE .*/MACHINE = \"raspberrypi4\"/" conf/local.conf
+    echo "" >> conf/local.conf
+    echo "# Configure for Raspberry Pi 4" >> conf/local.conf
+    echo "GPU_MEM = \"256\"" >> conf/local.conf
+    echo "DISABLE_OVERSCAN = \"1\"" >> conf/local.conf
+    echo "ENABLE_UART = \"1\"" >> conf/local.conf
+    echo "RPI_EXTRA_CONFIG = \"hdmi_drive=2\"" >> conf/local.conf
+    echo "LICENSE_FLAGS_ACCEPTED += \"commercial\"" >> conf/local.conf
+    echo "DISTRO_FEATURES_append = \" wayland\"" >> conf/local.conf
+
+    # Disable inotify on macOS to avoid issues
+    if [[ "$(uname)" == "Darwin" ]]; then
+        echo "# Disable inotify on macOS" >> conf/local.conf
+        echo "BB_GENERATE_MIRROR_TARBALLS = \"1\"" >> conf/local.conf
+        echo "BB_FSDEVICE = \"harddisk\"" >> conf/local.conf
+        echo "INHERIT_remove = \"inotify2\"" >> conf/local.conf
+    fi
+
+    echo "Created default local.conf for Raspberry Pi 4"
+fi
+
+echo "Verifying build environment..."
+echo ""
+echo "Build environment is ready. You can now:"
+echo "1. Build the full image: bitbake defender-automotive-image"
+echo "2. Build a specific component: bitbake <package-name>"
