@@ -48,6 +48,25 @@ check_layers() {
     return 0
 }
 
+# Fix for meta-rust compatibility
+update_rust_compatibility() {
+    if [ -f "conf/bblayers.conf" ]; then
+        # Check if meta-rust is compatible with the current version
+        if grep -q "meta-rust" conf/bblayers.conf; then
+            if [ -f "../meta-rust/conf/layer.conf" ]; then
+                # Check if LAYERSERIES_COMPAT_rust-layer includes kirkstone
+                if ! grep -q "LAYERSERIES_COMPAT_rust-layer.*kirkstone" ../meta-rust/conf/layer.conf; then
+                    echo "Updating meta-rust compatibility with kirkstone..."
+                    if grep -q "LAYERSERIES_COMPAT_rust-layer" ../meta-rust/conf/layer.conf; then
+                        # Add kirkstone to compatible layers
+                        sed -i 's/LAYERSERIES_COMPAT_rust-layer = "/LAYERSERIES_COMPAT_rust-layer = "kirkstone /g' ../meta-rust/conf/layer.conf
+                    fi
+                fi
+            fi
+        fi
+    fi
+}
+
 # Source the Yocto environment if poky-source exists
 if [ -d "poky-source" ]; then
     # First check if all required layers are available
@@ -129,6 +148,9 @@ BB_INOTIFY_ENABLED = "0"
 EOF
         echo "Created default local.conf for Raspberry Pi"
     fi
+
+    # Update meta-rust for compatibility
+    update_rust_compatibility
 
     # Verify the environment
     echo "Verifying build environment..."

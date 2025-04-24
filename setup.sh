@@ -20,7 +20,7 @@ clone_or_update() {
         cd ..
     else
         echo "Cloning $dir_name..."
-        if [ -n "$branch" ]; then
+        if [ -n "$branch" ] && [ "$branch" != "none" ]; then
             git clone -b $branch $repo_url $dir_name
         else
             git clone $repo_url $dir_name
@@ -76,8 +76,8 @@ clone_or_update "git://git.openembedded.org/meta-openembedded" "kirkstone" "meta
 # Clang (required by Chromium)
 clone_or_update "https://github.com/kraj/meta-clang.git" "kirkstone" "meta-clang"
 
-# Rust (required by some dependencies)
-clone_or_update "https://github.com/meta-rust/meta-rust.git" "kirkstone" "meta-rust"
+# Rust (required by some dependencies) - use main branch as kirkstone doesn't exist
+clone_or_update "https://github.com/meta-rust/meta-rust.git" "none" "meta-rust"
 
 # Virtualization
 clone_or_update "git://git.yoctoproject.org/meta-virtualization" "kirkstone" "meta-virtualization"
