@@ -26,7 +26,7 @@ IMAGE_INSTALL = " \
     nano \
     usbutils \
     pciutils \
-    wireless-tools \
+    iw \
     networkmanager \
     connman \
     bluez5 \
@@ -39,7 +39,6 @@ IMAGE_INSTALL += " \
     weston-init \
     weston-examples \
     libwayland-server \
-    labwc \
 "
 
 # Qt packages
@@ -47,7 +46,7 @@ IMAGE_INSTALL += " \
     qtbase \
     qtdeclarative \
     qtmultimedia \
-    qtwebengine \
+    qtwebview \
     qtquickcontrols2 \
     qtlocation \
     qtconnectivity \
