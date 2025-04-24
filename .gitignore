@@ -1,0 +1,10 @@
+# Build artifacts
+build/
+tmp/
+downloads/
+sstate-cache/
+
+# Cloned meta layers (will be pulled by setup script)
+poky-source/
+meta-*/
+!meta-defender/
