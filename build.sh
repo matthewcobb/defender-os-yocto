@@ -103,7 +103,7 @@ else
     echo "ENABLE_UART = \"1\"" >> conf/local.conf
     echo "RPI_EXTRA_CONFIG = \"hdmi_drive=2\"" >> conf/local.conf
     echo "LICENSE_FLAGS_ACCEPTED += \"commercial\"" >> conf/local.conf
-    echo "DISTRO_FEATURES_append = \" wayland\"" >> conf/local.conf
+    echo "DISTRO_FEATURES:append = \" wayland\"" >> conf/local.conf
 
     # Disable inotify on macOS to avoid issues
     if [[ "$(uname)" == "Darwin" ]]; then
