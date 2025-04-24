@@ -13,9 +13,9 @@ SRC_URI = "file://src/ \
 
 S = "${WORKDIR}"
 
-inherit cmake_qt6 pkgconfig systemd
+inherit qt6-cmake pkgconfig systemd
 
-SYSTEMD_SERVICE_${PN} = "defender-launcher.service"
+SYSTEMD_SERVICE:${PN} = "defender-launcher.service"
 
 do_install_append() {
     install -d ${D}${datadir}/applications
@@ -28,7 +28,7 @@ do_install_append() {
     install -m 0644 ${WORKDIR}/defender-launcher.service ${D}${systemd_unitdir}/system/
 }
 
-FILES_${PN} += "${datadir}/applications/defender-launcher.desktop \
+FILES:${PN} += "${datadir}/applications/defender-launcher.desktop \
                 ${systemd_unitdir}/system/defender-launcher.service"
 
-RDEPENDS_${PN} += "qtbase qtdeclarative qtquickcontrols2 qtsvg qtgraphicaleffects weston"
+RDEPENDS:${PN} += "qtbase qtdeclarative qtquickcontrols2 qtsvg qtgraphicaleffects weston"

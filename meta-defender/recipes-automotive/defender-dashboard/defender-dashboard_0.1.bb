@@ -12,7 +12,7 @@ SRC_URI = "file://src/ \
 
 S = "${WORKDIR}"
 
-inherit cmake_qt6 pkgconfig
+inherit qt6-cmake pkgconfig
 
 do_install_append() {
     install -d ${D}${datadir}/applications
@@ -22,6 +22,6 @@ do_install_append() {
     install -m 0755 ${B}/defender-dashboard ${D}${bindir}/
 }
 
-FILES_${PN} += "${datadir}/applications/defender-dashboard.desktop"
+FILES:${PN} += "${datadir}/applications/defender-dashboard.desktop"
 
-RDEPENDS_${PN} += "qtbase qtdeclarative qtquickcontrols2 qtwebsockets"
+RDEPENDS:${PN} += "qtbase qtdeclarative qtquickcontrols2 qtwebsockets"

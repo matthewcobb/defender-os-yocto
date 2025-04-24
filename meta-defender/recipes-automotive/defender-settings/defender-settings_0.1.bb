@@ -12,7 +12,7 @@ SRC_URI = "file://src/ \
 
 S = "${WORKDIR}"
 
-inherit cmake_qt6 pkgconfig
+inherit qt6-cmake pkgconfig
 
 do_install_append() {
     install -d ${D}${datadir}/applications
@@ -22,6 +22,6 @@ do_install_append() {
     install -m 0755 ${B}/defender-settings ${D}${bindir}/
 }
 
-FILES_${PN} += "${datadir}/applications/defender-settings.desktop"
+FILES:${PN} += "${datadir}/applications/defender-settings.desktop"
 
-RDEPENDS_${PN} += "qtbase qtdeclarative qtquickcontrols2 qtsvg"
+RDEPENDS:${PN} += "qtbase qtdeclarative qtquickcontrols2 qtsvg"

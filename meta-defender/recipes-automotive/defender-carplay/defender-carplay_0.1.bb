@@ -12,9 +12,9 @@ SRC_URI = "file://src/ \
 
 S = "${WORKDIR}"
 
-inherit cmake_qt6 pkgconfig systemd
+inherit qt6-cmake pkgconfig systemd
 
-SYSTEMD_SERVICE_${PN} = "defender-carplay.service"
+SYSTEMD_SERVICE:${PN} = "defender-carplay.service"
 
 do_install_append() {
     install -d ${D}${datadir}/applications
@@ -27,7 +27,7 @@ do_install_append() {
     install -m 0644 ${WORKDIR}/src/defender-carplay.service ${D}${systemd_unitdir}/system/
 }
 
-FILES_${PN} += "${datadir}/applications/defender-carplay.desktop \
+FILES:${PN} += "${datadir}/applications/defender-carplay.desktop \
                 ${systemd_unitdir}/system/defender-carplay.service"
 
-RDEPENDS_${PN} += "qtbase qtdeclarative qtmultimedia qtwebengine libusb1 avahi libplist usbmuxd"
+RDEPENDS:${PN} += "qtbase qtdeclarative qtmultimedia qtwebengine libusb1 avahi libplist usbmuxd"
