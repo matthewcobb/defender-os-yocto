@@ -1,11 +1,11 @@
 [Unit]
-Description=Defender Automotive Launcher
+Description=Defender CarPlay Integration
 After=weston.service
 Requires=weston.service
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/defender-launcher
+ExecStart=/usr/bin/defender-carplay
 Restart=on-failure
 Environment="XDG_RUNTIME_DIR=/run/user/0"
 Environment="WAYLAND_DISPLAY=wayland-0"

@@ -1,9 +1,9 @@
 [Desktop Entry]
 Type=Application
-Name=Defender Dashboard
-Comment=Automotive Dashboard Display
+Name=Dashboard
+Comment=Defender Automotive Dashboard
 Exec=defender-dashboard
-Icon=automotive-dashboard
+Icon=automotive-icon
 Terminal=false
-Categories=Qt;Automotive;
+Categories=Automotive;Qt;
 StartupNotify=false

@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Settings
+Comment=Defender Automotive Settings
+Exec=defender-settings
+Icon=automotive-icon
+Categories=Automotive;Qt;

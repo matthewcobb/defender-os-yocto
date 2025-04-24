@@ -6,7 +6,7 @@ int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
     app.setOrganizationName("DefenderAutomotive");
-    app.setApplicationName("Dashboard");
+    app.setApplicationName("Settings");
 
     QQuickStyle::setStyle("Material");
 

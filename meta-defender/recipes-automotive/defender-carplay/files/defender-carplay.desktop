@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=CarPlay
+Comment=Apple CarPlay Integration
+Exec=defender-carplay
+Icon=automotive-icon
+Categories=Automotive;Qt;

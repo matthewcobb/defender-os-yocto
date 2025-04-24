@@ -2,6 +2,5 @@
 <RCC version="1.0">
     <qresource prefix="/">
         <file>main.qml</file>
-        <file>images/engine-warning.png</file>
     </qresource>
 </RCC>

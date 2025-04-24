@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Launcher
+Comment=Defender Automotive Launcher
+Exec=defender-launcher
+Icon=automotive-icon
+Categories=Automotive;Qt;
